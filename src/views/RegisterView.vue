@@ -58,18 +58,44 @@
           </a-input-password>
         </a-form-item>
 
-        <!-- 确认密码 -->
-        <a-form-item name="confirmPassword">
-          <a-input-password
-              v-model:value="formState.confirmPassword"
-              placeholder="请确认密码"
+        <!-- 姓名 -->
+        <a-form-item name="name">
+          <a-input
+              v-model:value="formState.name"
+              placeholder="请输入姓名"
               size="large"
           >
             <template #prefix>
-              <LockOutlined />
+              <user-add-outlined />
             </template>
-          </a-input-password>
+          </a-input>
         </a-form-item>
+
+        <!-- 性别 -->
+        <a-form-item name="gender">
+          <a-select
+              v-model:value="formState.gender"
+              placeholder="请选择性别"
+              size="large"
+          >
+            <a-select-option value="0">男</a-select-option>
+            <a-select-option value="1">女</a-select-option>
+          </a-select>
+        </a-form-item>
+
+        <!-- 年龄 -->
+        <a-form-item name="age">
+          <a-input
+              v-model:value="formState.age"
+              placeholder="请输入年龄"
+              size="large"
+          >
+            <template #prefix>
+              <user-add-outlined />
+            </template>
+          </a-input>
+        </a-form-item>
+
 
         <!-- 用户角色 -->
         <a-form-item name="role">
@@ -81,6 +107,19 @@
             <a-select-option value="user">普通用户</a-select-option>
             <a-select-option value="merchant">商家</a-select-option>
           </a-select>
+        </a-form-item>
+
+        <!-- 电话号码 -->
+        <a-form-item name="phone">
+          <a-input
+              v-model:value="formState.phone"
+              placeholder="请输入电话号码"
+              size="large"
+          >
+            <template #prefix>
+              <whats-app-outlined />
+            </template>
+          </a-input>
         </a-form-item>
 
         <!-- 邮箱 -->
@@ -120,18 +159,12 @@
 </template>
 
 <script>
-import { UserOutlined, LockOutlined, MailOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 
 export default {
-  components: {
-    UserOutlined,
-    LockOutlined,
-    MailOutlined,
-    PlusOutlined,
-  },
+  name: 'RegisterView',
   setup() {
     const registerForm = ref(null);
     const loading = ref(false);
@@ -140,21 +173,24 @@ export default {
     const imageUrl = ref('');
 
     const formState = reactive({
-      username: '',
-      password: '',
-      confirmPassword: '',
+      username: '',//用户名
+      password: '',//密码
+      name:'',//姓名
+      gender:undefined,//性别
+      age:'',//年龄
+      phone: '',
       email: '',
       role: undefined, // 用户角色
       avatar: '',
     });
 
     // 验证密码是否一致
-    const validatePassword = (rule, value) => {
-      if (value !== formState.password) {
-        return Promise.reject('两次输入的密码不一致');
-      }
-      return Promise.resolve();
-    };
+    // const validatePassword = (rule, value) => {
+    //   if (value !== formState.password) {
+    //     return Promise.reject('两次输入的密码不一致');
+    //   }
+    //   return Promise.resolve();
+    // };
 
     const rules = {
       username: [
@@ -163,16 +199,22 @@ export default {
       password: [
         { required: true, message: '请输入密码', trigger: 'blur' },
       ],
-      confirmPassword: [
-        { required: true, message: '请确认密码', trigger: 'blur' },
-        { validator: validatePassword, trigger: 'blur' }, // 使用 validatePassword 函数
+      phone: [
+        { required: true, message: '请输入电话号码', trigger: 'blur' },
+        // { validator: validatePassword, trigger: 'blur' }, // 使用 validatePassword 函数
       ],
       email: [
-        { required: true, message: '请输入邮箱', trigger: 'blur' },
+        // { required: true, message: '请输入邮箱', trigger: 'blur' },
         { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' },
       ],
       role: [
         { required: true, message: '请选择用户类型', trigger: 'change' },
+      ],
+      gender: [
+        { required: true, message: '请选择性别', trigger: 'change' },
+      ],
+      name: [
+        { required: true, message: '请输入姓名', trigger: 'blur' },
       ],
     };
 

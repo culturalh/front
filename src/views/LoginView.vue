@@ -2,18 +2,17 @@
   <div class="login-container">
     <div class="login-background"></div>
     <a-card class="login-card" :bordered="false">
-      <h2 class="login-title">欢迎登录</h2>
+      <h2 class="login-title">家电租赁系统</h2>
 <!--      表单提交成功执行onFinish事件中的方法    -->
       <a-form
-          :model="formState"
+          :model="loginForm"
           :rules="rules"
-          ref="loginForm"
           @finish="onFinish"
           @finishFailed="onFinishFailed"
       >
         <a-form-item name="username">
           <a-input
-              v-model:value="formState.username"
+              v-model:value="loginForm.username"
               placeholder="请输入用户名"
               size="large"
           >
@@ -25,7 +24,7 @@
 
         <a-form-item name="password">
           <a-input-password
-              v-model:value="formState.password"
+              v-model:value="loginForm.password"
               placeholder="请输入密码"
               size="large"
           >
@@ -37,7 +36,7 @@
 
         <a-form-item name="role">
           <a-select
-              v-model:value="formState.role"
+              v-model:value="loginForm.role"
               placeholder="请选择登录角色"
               size="large"
           >
@@ -69,23 +68,18 @@
 </template>
 
 <script>
-import { UserOutlined, LockOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 export default {
   name: 'LoginView',
-  components: {
-    UserOutlined,
-    LockOutlined,
-  },
   setup() {
-    const loginForm = ref(null);
     const loading = ref(false);
     const router = useRouter();
 
-    const formState = reactive({
+    const loginForm = reactive({
       username: '',
       password: '',
       role: undefined, // 默认角色为空
@@ -103,15 +97,30 @@ export default {
       ],
     };
 
-    const onFinish = (values) => {
+    const onFinish = (loginForm) => {
       loading.value = true;
+      //发送axios请求，进行登录验证
+      axios.post('http://localhost:8090/login', {
+        username: loginForm.username,
+        password: loginForm.password,
+        role: loginForm.role,
+      })
+        .then((response) => {
+          console.log("返回的数据"+response.data)
+          router.push('/test')
+        })
+        .catch(() => {
+          loading.value = false;
+          message.error('登录失败，请检查用户名、密码和角色是否正确！');
+        });
+
       // 模拟登录请求
-      setTimeout(() => {
-        loading.value = false;
-        message.success(`登录成功！角色：${values.role}`);
-        console.log('登录数据:', values);
-        router.push('/dashboard'); // 登录成功后跳转到仪表盘页面
-      }, 1500);
+      // setTimeout(() => {
+      //   loading.value = false;
+      //   message.success(`登录成功！角色：${values.role}`);
+      //   console.log('登录数据:', values);
+      //   router.push('/dashboard'); // 登录成功后跳转到仪表盘页面
+      // }, 1500);
     };
 
     const onFinishFailed = (errors) => {
@@ -119,9 +128,8 @@ export default {
     };
 
     return {
-      formState,
-      rules,
       loginForm,
+      rules,
       loading,
       onFinish,
       onFinishFailed,
