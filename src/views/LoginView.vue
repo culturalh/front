@@ -70,14 +70,14 @@
 <script>
 import { message } from 'ant-design-vue';
 import { ref, reactive } from 'vue';
-import { useRouter } from 'vue-router';
+// import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 export default {
   name: 'LoginView',
   setup() {
     const loading = ref(false);
-    const router = useRouter();
+    // const router = useRouter();
 
     const loginForm = reactive({
       username: '',
@@ -105,12 +105,28 @@ export default {
         password: loginForm.password,
         role: loginForm.role,
       })
-        .then((response) => {
-          console.log("返回的数据"+response.data)
-          router.push('/test')
-        })
-        .catch(() => {
+        .then( response => {
+          //停止加载状态
           loading.value = false;
+          let isSuccess = response.data;
+          if (isSuccess) {
+            message.success('登录成功！');
+            // router.push('/dashboard');
+          } else {
+            console.log(response)
+            message.error('登录失败，请检查用户名、密码和角色是否正确！');
+          }
+          // console.log("返回的数据:",response)//不能使用+号拼接
+          // //TODO 判断返回的数据是否是成功
+          // message.info('登录成功！')
+
+          // router.push('/test')
+
+          // 15560697636
+        })
+        .catch(error => {
+          loading.value = false;
+          console.log("错误信息:",error)
           message.error('登录失败，请检查用户名、密码和角色是否正确！');
         });
 

@@ -4,9 +4,8 @@
     <a-card class="register-card" :bordered="false">
       <h2 class="register-title">用户注册</h2>
       <a-form
-          :model="formState"
+          :model="registerForm"
           :rules="rules"
-          ref="registerForm"
           @finish="onFinish"
           @finishFailed="onFinishFailed"
       >
@@ -35,7 +34,7 @@
         <!-- 用户名 -->
         <a-form-item name="username">
           <a-input
-              v-model:value="formState.username"
+              v-model:value="registerForm.username"
               placeholder="请输入用户名"
               size="large"
           >
@@ -48,7 +47,7 @@
         <!-- 密码 -->
         <a-form-item name="password">
           <a-input-password
-              v-model:value="formState.password"
+              v-model:value="registerForm.password"
               placeholder="请输入密码"
               size="large"
           >
@@ -61,7 +60,7 @@
         <!-- 姓名 -->
         <a-form-item name="name">
           <a-input
-              v-model:value="formState.name"
+              v-model:value="registerForm.name"
               placeholder="请输入姓名"
               size="large"
           >
@@ -74,19 +73,19 @@
         <!-- 性别 -->
         <a-form-item name="gender">
           <a-select
-              v-model:value="formState.gender"
+              v-model:value="registerForm.gender"
               placeholder="请选择性别"
               size="large"
           >
-            <a-select-option value="0">男</a-select-option>
-            <a-select-option value="1">女</a-select-option>
+            <a-select-option value="1">男</a-select-option>
+            <a-select-option value="0">女</a-select-option>
           </a-select>
         </a-form-item>
 
         <!-- 年龄 -->
         <a-form-item name="age">
           <a-input
-              v-model:value="formState.age"
+              v-model:value="registerForm.age"
               placeholder="请输入年龄"
               size="large"
           >
@@ -100,7 +99,7 @@
         <!-- 用户角色 -->
         <a-form-item name="role">
           <a-select
-              v-model:value="formState.role"
+              v-model:value="registerForm.role"
               placeholder="请选择用户类型"
               size="large"
           >
@@ -112,7 +111,7 @@
         <!-- 电话号码 -->
         <a-form-item name="phone">
           <a-input
-              v-model:value="formState.phone"
+              v-model:value="registerForm.phone"
               placeholder="请输入电话号码"
               size="large"
           >
@@ -125,7 +124,7 @@
         <!-- 邮箱 -->
         <a-form-item name="email">
           <a-input
-              v-model:value="formState.email"
+              v-model:value="registerForm.email"
               placeholder="请输入邮箱"
               size="large"
           >
@@ -162,17 +161,18 @@
 import { message } from 'ant-design-vue';
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from "axios";
 
 export default {
   name: 'RegisterView',
   setup() {
-    const registerForm = ref(null);
+    // const registerForm = ref(null);
     const loading = ref(false);
     const router = useRouter();
     const fileList = ref([]);
     const imageUrl = ref('');
 
-    const formState = reactive({
+    const registerForm = reactive({
       username: '',//用户名
       password: '',//密码
       name:'',//姓名
@@ -186,7 +186,7 @@ export default {
 
     // 验证密码是否一致
     // const validatePassword = (rule, value) => {
-    //   if (value !== formState.password) {
+    //   if (value !== registerForm.password) {
     //     return Promise.reject('两次输入的密码不一致');
     //   }
     //   return Promise.resolve();
@@ -225,7 +225,7 @@ export default {
         reader.readAsDataURL(info.file.originFileObj);
         reader.onload = () => {
           imageUrl.value = reader.result;
-          formState.avatar = reader.result;
+          registerForm.avatar = reader.result;
         };
       }
     };
@@ -244,15 +244,43 @@ export default {
     };
 
     // 提交注册表单
-    const onFinish = (values) => {
+    const onFinish = () => {
       loading.value = true;
-      // 模拟注册请求
-      setTimeout(() => {
-        loading.value = false;
-        message.success('注册成功！');
-        console.log('注册数据:', values);
-        router.push('/login');
-      }, 1500);
+
+      // 发送axios请求，进行注册验证
+      axios.post('http://localhost:8090/register',{
+        username: registerForm.username,//用户名
+        password: registerForm.password,//密码
+        name:registerForm.name,//姓名
+        gender:registerForm.gender,//性别
+        age:registerForm.age,//年龄
+        phone: registerForm.phone,
+        email: registerForm.email,
+        role: registerForm.role, // 用户角色
+        avatar: registerForm.avatar,
+      }).then(
+          response => {
+            loading.value = false;
+            let isSuccess = response.data;
+            if(isSuccess){
+              message.success('注册成功！')
+              router.push('/login')
+            }
+            //注册失败提示
+            message.warn(response.data.msg)
+            console.log("返回的数据:",response)
+            // //TODO 判断是否注册成功
+            // message.info('注册成功！')
+          }
+      )
+
+      // // 模拟注册请求
+      // setTimeout(() => {
+      //   loading.value = false;
+      //   message.success('注册成功！');
+      //   console.log('注册数据:', values);
+      //   router.push('/login');
+      // }, 1500);
     };
 
     const onFinishFailed = (errors) => {
@@ -260,7 +288,6 @@ export default {
     };
 
     return {
-      formState,
       rules,
       registerForm,
       loading,
