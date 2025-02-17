@@ -248,7 +248,7 @@ export default {
       loading.value = true;
 
       // 发送axios请求，进行注册验证
-      axios.post('http://localhost:8090/register',{
+      axios.post('/register',{
         username: registerForm.username,//用户名
         password: registerForm.password,//密码
         name:registerForm.name,//姓名

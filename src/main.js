@@ -20,11 +20,11 @@ for (const i in icons) {
  * axios拦截器
  */
 axios.interceptors.request.use(config => {
-  const _token = store.state.member.token;
-  if (_token) {
-    config.headers.token = _token;
-    console.log("请求头headers增加token：",_token);
-  }
+  // const _token = store.state.member.token;
+  // if (_token) {
+  //   config.headers.token = _token;
+  //   console.log("请求头headers增加token：",_token);
+  // }
   //成功之后的处理
   // 获取token
   console.log("请求参数：",config);
@@ -40,7 +40,7 @@ axios.interceptors.response.use(res => {
   const  response = error.response;
   if(response.status === 401){
     console.log("未登录或者登录超时")
-    store.commit("setMember",{});
+    // store.commit("setMember",{});
     message.error({description:"未登录或者登录超时"})
     router.push("/login");
   }

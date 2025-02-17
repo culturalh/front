@@ -70,14 +70,14 @@
 <script>
 import { message } from 'ant-design-vue';
 import { ref, reactive } from 'vue';
-// import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 export default {
   name: 'LoginView',
   setup() {
     const loading = ref(false);
-    // const router = useRouter();
+    const router = useRouter();
 
     const loginForm = reactive({
       username: '',
@@ -100,7 +100,7 @@ export default {
     const onFinish = (loginForm) => {
       loading.value = true;
       //发送axios请求，进行登录验证
-      axios.post('http://localhost:8090/login', {
+      axios.post('/login', {
         username: loginForm.username,
         password: loginForm.password,
         role: loginForm.role,
@@ -111,7 +111,7 @@ export default {
           let isSuccess = response.data;
           if (isSuccess) {
             message.success('登录成功！');
-            // router.push('/dashboard');
+            router.push('/');//跳转到首页
           } else {
             console.log(response)
             message.error('登录失败，请检查用户名、密码和角色是否正确！');
