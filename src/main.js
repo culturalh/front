@@ -46,5 +46,7 @@ axios.interceptors.response.use(res => {
   }
   return Promise.reject(error);
 })
-
-
+//设置请求基地址
+axios.defaults.baseURL = process.env.VUE_APP_SERVER;
+console.log("环境",process.env.NODE_ENV);
+console.log("服务端地址",process.env.VUE_APP_SERVER);
