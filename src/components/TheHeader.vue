@@ -14,11 +14,14 @@
           :theme="theme"
           class="nav-menu"
       >
+
         <a-menu-item
             v-for="item in menuItems"
             :key="item.key"
         >
-          {{ item.label }}
+          <router-link :to="item.to">
+              {{ item.label }}
+          </router-link>
         </a-menu-item>
       </a-menu>
 

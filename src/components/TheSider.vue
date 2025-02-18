@@ -24,10 +24,12 @@
       <template v-for="item in menuItems" :key="item.key">
         <!-- 带图标的菜单项 -->
         <a-menu-item v-if="!item.children" :key="item.key">
+          <router-link :to="item.to">
           <template #icon v-if="item.icon">
             <component :is="item.icon" />
           </template>
           {{ item.label }}
+          </router-link>
         </a-menu-item>
 
         <!-- 子菜单 -->
@@ -47,9 +49,9 @@
     </a-menu>
 
     <!-- 底部插槽 -->
-    <div v-if="$slots.footer" class="sider-footer">
-      <slot name="footer"></slot>
-    </div>
+<!--    <div v-if="$slots.footer" class="sider-footer">-->
+<!--      <slot name="footer"></slot>-->
+<!--    </div>-->
   </a-layout-sider>
 </template>
 
@@ -104,7 +106,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:collapsed', 'menu-select']);
 
-// 处理折叠状态
+// // 处理折叠状态
 const isCollapsed = computed({
   get: () => props.collapsed,
   set: (val) => emit('update:collapsed', val)
@@ -130,8 +132,6 @@ const handleSelect = ({ key }) => {
   z-index: 100;
   overflow: auto;
 }
-
-
 
 .sider-title {
   padding: 16px;

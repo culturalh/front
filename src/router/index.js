@@ -2,10 +2,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 // import HomeView from '../views/HomeView.vue'
 
 const routes = [
-  // {
-  //   path: '/',
-  //   redirect:"/login"
-  // },
+  {
+    path: '',
+    redirect:"/login"
+  },
   {
     path: '/login',
     name: 'LoginView',
@@ -16,21 +16,52 @@ const routes = [
     name: 'RegisterView',
    component: () => import('../views/RegisterView.vue')
   },
+    //管理员路由
   {
     path:'/adminMain',
     name: 'AdminMain',
-    component: () => import('../views/admin/AdminMain')
+    redirect: '/adminHome',
+    component: () => import('../views/admin/AdminMain'),
+    children:[
+      {
+        path:'/adminHome',
+        name: 'AdminHome',
+        component: () => import('../components/admin/AdminHome')
+      }
+    ]
   },
+    //商家路由
   {
     path:'/merchantMain',
     name: 'MerchantMain',
-    component: () => import('../views/merchant/MerchantMain')
+    redirect: '/merchantHome',
+    component: () => import('../views/merchant/MerchantMain'),
+    children:[
+      {
+        path:'/merchantHome',
+        name: 'MerchantHome',
+        component: () => import('../components/merchant/MerchantHome')
+      }
+    ]
   },
+
+    //用户路由
   {
     path:'/userMain',
     name: 'UserMain',
-    component: () => import('../views/user/UserMain')
+    redirect: '/userHome',
+    component: () => import('../views/user/UserMain'),
+    children:[
+      {
+        path:'/userHome',
+        name: 'UserHome',
+        component: () => import('../components/user/UserHome')
+      }
+    ]
   }
+
+
+
 ]
 
 const router = createRouter({

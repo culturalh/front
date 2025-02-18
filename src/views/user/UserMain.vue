@@ -64,7 +64,7 @@
 
       <TheSider
           :menu-items="sideMenuItems"
-          :collapsible="true"
+          :collapsible="false"
           @menu-select="handleMenuSelect"
       >
         <template #title>
@@ -119,33 +119,36 @@
 
       <!-- 内容区域 -->
       <a-layout-content class="content">
-        <!-- 横幅区域 -->
-        <div class="banner">
-          <h1>轻松租赁 品质生活</h1>
-          <p>每日租金低至 ¥9.9 起</p>
-          <a-button type="primary" size="large">立即租赁</a-button>
-        </div>
+<!--        &lt;!&ndash; 横幅区域 &ndash;&gt;-->
+<!--        <div class="banner">-->
+<!--          <h1>轻松租赁 品质生活</h1>-->
+<!--          <p>每日租金低至 ¥9.9 起</p>-->
+<!--          <a-button type="primary" size="large">立即租赁</a-button>-->
+<!--        </div>-->
 
-        <!-- 推荐家电 -->
-        <a-card title="推荐家电" class="recommend-card">
-          <a-row :gutter="[16, 16]">
-            <a-col :span="6" v-for="item in appliances" :key="item.id">
-              <a-card hoverable>
-                <template #cover>
-                  <img :src="item.image" alt="家电图片" />
-                </template>
-                <a-card-meta :title="item.name">
-                  <template #description>
-                    <div class="appliance-info">
-                      <span class="price">¥{{ item.price }}/日</span>
-                      <a-tag color="blue">{{ item.category }}</a-tag>
-                    </div>
-                  </template>
-                </a-card-meta>
-              </a-card>
-            </a-col>
-          </a-row>
-        </a-card>
+<!--        &lt;!&ndash; 推荐家电 &ndash;&gt;-->
+<!--        <a-card title="推荐家电" class="recommend-card">-->
+<!--          <a-row :gutter="[16, 16]">-->
+<!--            <a-col :span="6" v-for="item in appliances" :key="item.id">-->
+<!--              <a-card hoverable>-->
+<!--                <template #cover>-->
+<!--                  <img :src="item.image" alt="家电图片" />-->
+<!--                </template>-->
+<!--                <a-card-meta :title="item.name">-->
+<!--                  <template #description>-->
+<!--                    <div class="appliance-info">-->
+<!--                      <span class="price">¥{{ item.price }}/日</span>-->
+<!--                      <a-tag color="blue">{{ item.category }}</a-tag>-->
+<!--                    </div>-->
+<!--                  </template>-->
+<!--                </a-card-meta>-->
+<!--              </a-card>-->
+<!--            </a-col>-->
+<!--          </a-row>-->
+<!--        </a-card>-->
+
+        <router-view></router-view>
+
       </a-layout-content>
     </a-layout>
   </a-layout>
@@ -169,40 +172,40 @@ import {
 // const topNavKeys = ref(['home']);
 // const sideNavKeys = ref(['1']);
 
-const appliances = ref([
-  {
-    id: 1,
-    name: '智能变频空调',
-    category: '空调',
-    price: 15.9,
-    image: 'https://via.placeholder.com/300x200'
-  },
-  {
-    id: 2,
-    name: '双开门冰箱',
-    category: '冰箱',
-    price: 12.5,
-    image: 'https://via.placeholder.com/300x200'
-  },
-  {
-    id: 3,
-    name: '滚筒洗衣机',
-    category: '洗衣机',
-    price: 9.9,
-    image: 'https://via.placeholder.com/300x200'
-  },
-  {
-    id: 4,
-    name: '4K 智能电视',
-    category: '电视',
-    price: 8.8,
-    image: 'https://via.placeholder.com/300x200'
-  }
-]);
+// const appliances = ref([
+//   {
+//     id: 1,
+//     name: '智能变频空调',
+//     category: '空调',
+//     price: 15.9,
+//     image: 'https://via.placeholder.com/300x200'
+//   },
+//   {
+//     id: 2,
+//     name: '双开门冰箱',
+//     category: '冰箱',
+//     price: 12.5,
+//     image: 'https://via.placeholder.com/300x200'
+//   },
+//   {
+//     id: 3,
+//     name: '滚筒洗衣机',
+//     category: '洗衣机',
+//     price: 9.9,
+//     image: 'https://via.placeholder.com/300x200'
+//   },
+//   {
+//     id: 4,
+//     name: '4K 智能电视',
+//     category: '电视',
+//     price: 8.8,
+//     image: 'https://via.placeholder.com/300x200'
+//   }
+// ]);
 const topMenuItems = ref([
-  { key: 'home', label: '首页' },
-  { key: 'category', label: '系统通知' },
-  { key: 'about', label: '关于我们' }
+  { key: 'home', label: '首页' ,to: '/userHome'},
+  { key: 'category', label: '系统通知', to: '/userNotice' },
+  { key: 'about', label: '关于我们', to: '/AboutUs' }
 ]);
 
 const handleLogout = () => {
@@ -216,33 +219,39 @@ const handleLogout = () => {
 const sideMenuItems = ref([
   {
     key: '1',
-    label: '首页概览',
-    icon: HomeOutlined
+    label: '首页',
+    icon: HomeOutlined,
+    to: '/userHome'
   },
   {
     key: '2',
     label: '个人信息',
-    icon: AppstoreOutlined
+    icon: AppstoreOutlined,
+    to: '/userInfo'
   },
   {
     key: '3',
     label: '订单管理',
-    icon: ShoppingCartOutlined
+    icon: ShoppingCartOutlined,
+    to: '/userOrder'
   },
   {
     key: '4',
     label: '查看家电信息',
-    icon: TeamOutlined
+    icon: TeamOutlined,
+    to: '/userApplianceInfo'
   },
   {
     key: '5',
     label: '交易管理',
-    icon: ProfileOutlined
+    icon: ProfileOutlined,
+    to: '/userTransaction'
   },
   {
     key: '6',
     label: '日志管理',
-    icon: QuestionCircleOutlined
+    icon: QuestionCircleOutlined,
+    to: '/userLog'
   }
 ]);
 
