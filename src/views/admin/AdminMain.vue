@@ -207,7 +207,7 @@ import {
 const topMenuItems = ref([
   { key: 'home', label: '首页',to:'/adminHome' },
   { key: 'category', label: '发布系统通知',to:'/adminNotice' },
-  { key: 'about', label: '关于我们' ,to:'/aboutUs' }
+  { key: 'about', label: '关于我们' ,to:'/adminAboutUs' }
 ]);
 
 const handleLogout = () => {
@@ -240,13 +240,13 @@ const sideMenuItems = ref([
     key: '4',
     label: '用户信息管理',
     icon: TeamOutlined,
-    to:'/userInfo'
+    to:'/userInfoManagement'
   },
   {
     key: '5',
     label: '商家信息管理',
     icon: ProfileOutlined,
-    to:'/merchantInfo'
+    to:'/merchantInfoManagement'
   },
   {
     key: '6',

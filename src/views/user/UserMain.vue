@@ -205,7 +205,7 @@ import {
 const topMenuItems = ref([
   { key: 'home', label: '首页' ,to: '/userHome'},
   { key: 'category', label: '系统通知', to: '/userNotice' },
-  { key: 'about', label: '关于我们', to: '/AboutUs' }
+  { key: 'about', label: '关于我们', to: '/userAboutUs' }
 ]);
 
 const handleLogout = () => {

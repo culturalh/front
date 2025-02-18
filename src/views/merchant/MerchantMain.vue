@@ -203,7 +203,7 @@ import {
 const topMenuItems = ref([
   { key: 'home', label: '首页', to:'/merchantHome' },
   { key: 'category', label: '系统通知', to:'/merchantNotice' },
-  { key: 'about', label: '关于我们' , to:'/AboutUs' }
+  { key: 'about', label: '关于我们' , to:'/merchantAboutUs' }
 ]);
 
 const handleLogout = () => {
@@ -225,12 +225,13 @@ const sideMenuItems = ref([
     key: '2',
     label: '商家信息',
     icon: AppstoreOutlined,
-    to: '/merchantInformation'
+    to: '/merchantInfo'
   },
   {
     key: '3',
     label: '订单管理',
-    icon: ShoppingCartOutlined
+    icon: ShoppingCartOutlined,
+    to: '/merchantOrder'
   },
   {
     key: '4',
