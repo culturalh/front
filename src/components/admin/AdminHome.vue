@@ -21,7 +21,7 @@
 
     <!-- 底部 -->
     <a-layout-footer class="admin-footer">
-      Copyright © 2025 家电租赁管理系统
+      Copyright © 2023 家电租赁管理系统
     </a-layout-footer>
   </a-layout>
 </template>

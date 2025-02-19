@@ -122,7 +122,6 @@ export default {
 
           // router.push('/test')
 
-          // 15560697636
         })
         .catch(error => {
           loading.value = false;
