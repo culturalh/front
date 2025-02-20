@@ -34,6 +34,8 @@ axios.interceptors.request.use(config => {
   //失败之后的处理
   return Promise.reject(error);
 });
+
+
 axios.interceptors.response.use(res => {
   console.log("响应参数：",res);
   return res;
@@ -47,6 +49,7 @@ axios.interceptors.response.use(res => {
   }
   return Promise.reject(error);
 })
+
 //设置请求基地址
 axios.defaults.baseURL = process.env.VUE_APP_SERVER;
 console.log("环境",process.env.NODE_ENV);

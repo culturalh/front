@@ -82,6 +82,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { message } from 'ant-design-vue';
+// import axios from "axios";
 
 // 初始模拟数据
 const initData = [
@@ -204,6 +205,77 @@ const deleteItem = (id) => {
 const onSearch = () => {
   // 搜索功能已经通过 computed 实现，无需额外操作
 };
+
+
+// // 查询通知
+// const getNotification = async () => {
+//   try {
+//     const response = await axios.get('/admin/notification/get', {
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//     });
+//     if (response.data.success) {
+//       notifications.value = response.data.content;
+//     } else {
+//       console.error('Failed to fetch notifications');
+//     }
+//   } catch (error) {
+//     console.error('Error fetching notifications:', error);
+//   }
+// };
+//
+// // 增加通知
+// const addNotification = async () => {
+//   try {
+//     console.log("formState:", formState);
+//     await axios.post('/admin/notification/add', {
+//       id: formState.id,
+//       title: formState.title,
+//       content: formState.content,
+//     }).then(response => {
+//       if (response.data.success) {
+//         getNotification();
+//       }
+//     });
+//   } catch (error) {
+//     console.error('Error adding notification:', error);
+//   }
+// };
+//
+// // 修改通知
+// const updateNotification = async () => {
+//   try {
+//     await axios.post('/admin/notification/update', {
+//       id: formState.id,
+//       title: formState.title,
+//       content: formState.content,
+//     }).then(response => {
+//       if (response.data.success) {
+//         getNotification();
+//       }
+//     });
+//   } catch (error) {
+//     console.error('Error updating notification:', error);
+//   }
+// };
+//
+// // 删除通知
+// const deleteNotice = async (id) => {
+//   try {
+//     await axios.delete(`/admin/notification/delete/${id}`, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//     }).then(response => {
+//       if (response.data.success) {
+//         getNotification();
+//       }
+//     });
+//   } catch (error) {
+//     console.error('Error deleting notification:', error);
+//   }
+// };
 </script>
 
 <style scoped>
