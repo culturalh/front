@@ -3,7 +3,7 @@
     <!-- 操作工具栏 -->
     <div class="toolbar">
       <a-input-search
-          v-model="searchQuery"
+          v-model:value="searchQuery"
           placeholder="请输入分类名称"
           enter-button="搜索"
           @search="onSearch"
@@ -21,28 +21,28 @@
         </tr>
         </thead>
         <tbody>
-        <tr v-for="item in filteredDataSource" :key="item.category_id">
-          <td>{{ item.category_id }}</td>
-          <td>{{ item.device_type }}</td>
+        <tr v-for="(item, index) in dataSource" :key="item.categoryId">
+          <td>{{ index + 1 }}</td>
+          <td>{{ item.deviceType }}</td>
           <td>
-            <a-tag :color="item.is_active === '1' ? 'green' : 'red'">
-              {{ item.is_active === '1' ? '已启用' : '已禁用' }}
+            <a-tag :color="item.isActive === '1' ? 'green' : 'red'">
+              {{ item.isActive === '1' ? '已启用' : '已禁用' }}
             </a-tag>
           </td>
-          <td>{{ item.created_time }}</td>
+          <td>{{ item.createdTime }}</td>
           <td>
             <a-space>
               <a-button size="small" @click="showModal('edit', item)">编辑</a-button>
               <a-button
                   size="small"
-                  :type="item.is_active === '1' ? 'danger' : 'primary'"
+                  :type="item.isActive === '1' ? 'danger' : 'primary'"
                   @click="toggleStatus(item)"
               >
-                {{ item.is_active === '1' ? '禁用' : '启用' }}
+                {{ item.isActive === '1' ? '禁用' : '启用' }}
               </a-button>
               <a-popconfirm
                   title="确认删除该分类吗？"
-                  @confirm="deleteItem(item.category_id)"
+                  @confirm="deleteItem(item.categoryId)"
               >
                 <a-button size="small" danger>删除</a-button>
               </a-popconfirm>
@@ -61,18 +61,11 @@
     >
       <a-form :model="formState" layout="vertical">
         <a-form-item
-            label="分类编号"
-            name="category_id"
-            :rules="[{ required: true, message: '请输入分类编号' }]"
-        >
-          <a-input v-model:value="formState.category_id" />
-        </a-form-item>
-        <a-form-item
             label="分类名称"
-            name="device_type"
+            name="deviceType"
             :rules="[{ required: true, message: '请输入分类名称' }]"
         >
-          <a-input v-model:value="formState.device_type" />
+          <a-input v-model:value="formState.deviceType" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -80,25 +73,23 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import {ref, reactive, onMounted} from 'vue';
 import { message } from 'ant-design-vue';
-// import axios from "axios";
+import axios from "axios";
 
 // 初始模拟数据
 const initData = [
   {
-    category_id: 1,
-    device_type: '大家电',
-    is_active: '1',
-    created_time: '2023-10-01 10:00:00',
-    is_delete: '0'
+    categoryId: 1,
+    deviceType: '大家电',
+    isActive: '1',
+    createdTime: '2023-10-01 10:00:00',
   },
   {
-    category_id: 2,
-    device_type: '厨房电器',
-    is_active: '0',
-    created_time: '2023-10-02 14:30:00',
-    is_delete: '0'
+    categoryId: 2,
+    deviceType: '厨房电器',
+    isActive: '0',
+    createdTime: '2023-10-02 14:30:00',
   }
 ];
 
@@ -106,22 +97,22 @@ const initData = [
 const columns = [
   {
     title: '分类编号',
-    dataIndex: 'category_id',
+    dataIndex: 'categoryId',
     width: 120
   },
   {
     title: '分类名称',
-    dataIndex: 'device_type',
+    dataIndex: 'deviceType',
     ellipsis: true
   },
   {
     title: '状态',
-    dataIndex: 'is_active',
-    slots: { customRender: 'status' }
+    dataIndex: 'isActive',
+    // slots: { customRender: 'status' }
   },
   {
     title: '创建时间',
-    dataIndex: 'created_time',
+    dataIndex: 'createdTime',
     width: 200
   },
   {
@@ -135,18 +126,11 @@ const columns = [
 const dataSource = ref([...initData]);
 const searchQuery = ref('');
 
-// 过滤后的数据源
-const filteredDataSource = computed(() => {
-  return dataSource.value.filter(item =>
-      item.device_type.includes(searchQuery.value)
-  );
-});
-
 const modalVisible = ref(false);
 const modalType = ref('add');
 const formState = reactive({
-  category_id: null,
-  device_type: '',
+  categoryId: null,
+  deviceType: '',
 });
 
 // 显示模态框
@@ -155,127 +139,135 @@ const showModal = (type, record) => {
   if (type === 'edit') {
     Object.assign(formState, record);
   } else {
-    formState.device_type = '';
+    formState.deviceType = '';
   }
   modalVisible.value = true;
 };
 
 // 提交表单
 const handleSubmit = () => {
-  if (!formState.device_type) {
+  if (!formState.deviceType) {
     message.error('请填写分类名称');
     return;
   }
 
   if (modalType.value === 'add') {
-    const newId = dataSource.value.length
-        ? Math.max(...dataSource.value.map(d => d.category_id)) + 1
-        : 1;
-
-    dataSource.value.push({
-      ...formState,
-      category_id: newId,
-      is_active: '1',
-      is_delete: '0',
-      created_time: new Date().toLocaleString()
-    });
+    addApplianceClassify();
   } else {
-    const index = dataSource.value.findIndex(
-        d => d.category_id === formState.category_id
-    );
-    dataSource.value.splice(index, 1, formState);
+   updateApplianceClassify();
   }
 
   modalVisible.value = false;
-  message.success('操作成功');
 };
 
 // 切换状态
 const toggleStatus = (record) => {
-  record.is_active = record.is_active === '1' ? '0' : '1';
+  // 直接修改 formState 的属性
+  formState.categoryId = record.categoryId;
+  formState.deviceType = record.deviceType;
+  formState.isActive = record.isActive === '1' ? '0' : '1'; // 切换状态
+  console.log('formState',formState)
+  //修改是否禁用
+  // formState.isActive = record.isActive;
+  console.log('formState.isActive',formState.isActive)
+  //更新家电分类
+  updateApplianceClassify();
+  // 重新获取家电分类
+  getApplianceClassify();
 };
 
 // 删除项
-const deleteItem = (id) => {
-  dataSource.value = dataSource.value.filter(d => d.category_id !== id);
-  message.success('删除成功');
+const deleteItem = (categoryId) => {
+  deleteApplianceClassify(categoryId);
 };
 
 // 搜索功能
 const onSearch = () => {
-  // 搜索功能已经通过 computed 实现，无需额外操作
+  getApplianceClassify();
 };
 
+onMounted(()=>{
+  getApplianceClassify();
+})
 
-// // 查询通知
-// const getNotification = async () => {
-//   try {
-//     const response = await axios.get('/admin/notification/get', {
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//     });
-//     if (response.data.success) {
-//       notifications.value = response.data.content;
-//     } else {
-//       console.error('Failed to fetch notifications');
-//     }
-//   } catch (error) {
-//     console.error('Error fetching notifications:', error);
-//   }
-// };
-//
-// // 增加通知
-// const addNotification = async () => {
-//   try {
-//     console.log("formState:", formState);
-//     await axios.post('/admin/notification/add', {
-//       id: formState.id,
-//       title: formState.title,
-//       content: formState.content,
-//     }).then(response => {
-//       if (response.data.success) {
-//         getNotification();
-//       }
-//     });
-//   } catch (error) {
-//     console.error('Error adding notification:', error);
-//   }
-// };
-//
-// // 修改通知
-// const updateNotification = async () => {
-//   try {
-//     await axios.post('/admin/notification/update', {
-//       id: formState.id,
-//       title: formState.title,
-//       content: formState.content,
-//     }).then(response => {
-//       if (response.data.success) {
-//         getNotification();
-//       }
-//     });
-//   } catch (error) {
-//     console.error('Error updating notification:', error);
-//   }
-// };
-//
-// // 删除通知
-// const deleteNotice = async (id) => {
-//   try {
-//     await axios.delete(`/admin/notification/delete/${id}`, {
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//     }).then(response => {
-//       if (response.data.success) {
-//         getNotification();
-//       }
-//     });
-//   } catch (error) {
-//     console.error('Error deleting notification:', error);
-//   }
-// };
+
+// 查询家电分类（可以模糊查询）
+const getApplianceClassify = async () => {
+  try {
+    await axios.get(  '/admin/applianceClassify/get',
+        {
+          params: {
+            searchQuery: searchQuery.value,
+          },
+        }
+     ).then(response => {
+      if (response.data.success) {
+        console.log('response.data.content', response.data.content)
+        dataSource.value = response.data.content;
+        console.log('dataSource.value', dataSource.value)
+      } else {
+        console.error('Failed to fetch applianceClassify');
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching applianceClassify:', error);
+  }
+};
+
+// 增加家电分类
+const addApplianceClassify = async () => {
+  try {
+    await axios.post('/admin/applianceClassify/add', {
+      deviceType: formState.deviceType,
+      //默认为禁用状态
+
+    }).then(response => {
+      if (response.data.success) {
+        message.success('添加成功');
+        getApplianceClassify();
+      }
+    });
+  } catch (error) {
+    console.error('Error adding applianceClassify:', error);
+  }
+};
+
+// 修改家电分类
+const updateApplianceClassify = async () => {
+  try {
+    await axios.post('/admin/applianceClassify/update', {
+      categoryId: formState.categoryId,
+      deviceType: formState.deviceType,
+      isActive: formState.isActive,
+      createdTime: formState.createdTime,
+    }).then(response => {
+      if (response.data.success) {
+        message.success('修改成功');
+        getApplianceClassify();
+      }
+    });
+  } catch (error) {
+    console.error('Error updating applianceClassify:', error);
+  }
+};
+
+// 删除家电分类
+const deleteApplianceClassify = async (categoryId) => {
+  try {
+    await axios.delete(`/admin/applianceClassify/delete/${categoryId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then(response => {
+      if (response.data.success) {
+        message.success('删除成功');
+        getApplianceClassify();
+      }
+    });
+  } catch (error) {
+    console.error('Error deleting applianceClassify:', error);
+  }
+};
 </script>
 
 <style scoped>

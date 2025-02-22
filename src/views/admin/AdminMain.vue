@@ -226,7 +226,7 @@ const sideMenuItems = ref([
   },
   {
     key: '2',
-    label: '家电信息管理',
+    label: '家电分类信息管理',
     icon: AppstoreOutlined,
     to:'/homeApplianceInfo'
   },

@@ -57,11 +57,11 @@
           </a-input-password>
         </a-form-item>
 
-        <!-- 姓名 -->
+        <!-- 名称 -->
         <a-form-item name="name">
           <a-input
               v-model:value="registerForm.name"
-              placeholder="请输入姓名"
+              placeholder="请输入名称"
               size="large"
           >
             <template #prefix>
@@ -214,7 +214,7 @@ export default {
         { required: true, message: '请选择性别', trigger: 'change' },
       ],
       name: [
-        { required: true, message: '请输入姓名', trigger: 'blur' },
+        { required: true, message: '请输入名称', trigger: 'blur' },
       ],
     };
 

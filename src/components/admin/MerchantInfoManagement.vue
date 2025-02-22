@@ -3,7 +3,7 @@
     <!-- 操作工具栏 -->
     <div class="toolbar">
       <a-input-search
-          v-model="searchQuery"
+          v-model:value="searchQuery"
           placeholder="请输入商家名称"
           enter-button="搜索"
           @search="matchSearch"
@@ -24,22 +24,22 @@
         <tr v-for="(item, index ) in dataSource" :key="item.id">
           <td>{{ index + 1 }}  </td>
           <td>{{ item.username }}</td>
-<!--          <td>-->
-<!--            <a-tag :color="item.is_active === '1' ? 'green' : 'red'">-->
-<!--              {{ item.is_active === '1' ? '已启用' : '已禁用' }}-->
-<!--            </a-tag>-->
-<!--          </td>-->
+          <td>
+            <a-tag :color="item.isActived === '0' ? 'green' : 'red'">
+              {{ item.isActived === '0' ? '已启用' : '已禁用' }}
+            </a-tag>
+          </td>
           <td> {{ item.name }}</td>
           <td>{{ item.phone }}</td>
           <td>
             <a-space>
-              <a-button size="small" @click="showModal('edit', item)">详情</a-button>
+              <a-button size="small" @click="showModal(item)">详情</a-button>
               <a-button
                   size="small"
-                  :type="item.is_active === '1' ? 'danger' : 'primary'"
+                  :type="item.isActived === '0' ? 'danger' : 'primary'"
                   @click="toggleStatus(item)"
               >
-                {{ item.is_active === '1' ? '禁用' : '启用' }}
+                {{ item.isActived === '0' ? '禁用' : '启用' }}
               </a-button>
 <!--              <a-popconfirm-->
 <!--                  title="确认删除该分类吗？"-->
@@ -54,35 +54,60 @@
       </table>
     </div>
 
-    <!-- 新增/编辑模态框 -->
+    <!-- 编辑模态框 -->
     <a-modal
         v-model:visible="modalVisible"
-        :title="modalType === 'add' ? '新增分类' : '编辑分类'"
-        @ok="handleSubmit"
+        title="商家详细信息"
+        @ok="handleSave"
+        width="600px"
     >
-      <a-form :model="formState" layout="vertical">
-        <a-form-item
-            label="分类编号"
-            name="category_id"
-            :rules="[{ required: true, message: '请输入分类编号' }]"
-        >
-          <a-input v-model:value="formState.category_id" />
+      <a-form
+          :model="formState"
+          :label-col="{ span: 6 }"
+          :wrapper-col="{ span: 16 }"
+      >
+        <a-form-item label="头像">
+          <a-avatar
+              :src="formState.avatar + '?t=' + Date.now()"
+              :size="100"
+              v-if="formState.avatar"
+          />
         </a-form-item>
-        <a-form-item
-            label="分类名称"
-            name="device_type"
-            :rules="[{ required: true, message: '请输入分类名称' }]"
-        >
-          <a-input v-model:value="formState.device_type" />
+        <a-form-item label="用户名">
+          <a-input v-model:value="formState.username"  disabled="true"/>
         </a-form-item>
+        <a-form-item label="名称">
+          <a-input v-model:value="formState.name" disabled="true" />
+        </a-form-item>
+        <!--      <a-form-item label="性别">-->
+        <!--        <a-select v-model:value="formState.gender">-->
+        <!--          <a-select-option value="0">女</a-select-option>-->
+        <!--          <a-select-option value="1">男</a-select-option>-->
+        <!--        </a-select>-->
+        <!--      </a-form-item>-->
+        <!--      <a-form-item label="年龄">-->
+        <!--        <a-input-number-->
+        <!--            v-model:value="formState.age"-->
+        <!--            :min="0"-->
+        <!--            style="width: 100%"-->
+        <!--        />-->
+        <!--      </a-form-item>-->
+        <a-form-item label="电话">
+          <a-input v-model:value="formState.phone" disabled="true" />
+        </a-form-item>
+        <a-form-item label="邮箱">
+          <a-input v-model:value="formState.email" disabled="true" />
+        </a-form-item>
+
       </a-form>
     </a-modal>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import {ref, reactive, onMounted} from 'vue';
 import { message } from 'ant-design-vue';
+import axios from "axios";
 
 // 初始模拟数据
 const initData = [
@@ -91,6 +116,7 @@ const initData = [
     username: 'zhangsan',
     name: '张三',
     phone: '123456789',
+    isActived: 1,
     // is_delete: '0'
   },
   {
@@ -98,6 +124,7 @@ const initData = [
     username: 'wangwu',
     name: '王五',
     phone: '123456789',
+    isActived: 0,
     // is_delete: '0'
   }
 ];
@@ -113,6 +140,11 @@ const columns = [
     title: '用户名',
     dataIndex: 'username',
     width: 120
+  },
+  {
+    title: '状态',
+    dataIndex: 'isActive',
+    // slots: { customRender: 'status' }
   },
   {
     title: '名称',
@@ -143,73 +175,172 @@ const searchQuery = ref('');
 // });
 
 const modalVisible = ref(false);
-const modalType = ref('add');
+// const modalType = ref('add');
 const formState = reactive({
-  category_id: null,
-  device_type: '',
+  username:'',
+  name:'',
+  gender:'',
+  age:'',
+  phone:'',
+  email:'',
+  avatar:'',
 });
 
 // 显示模态框
-const showModal = (type, record) => {
-  modalType.value = type;
-  if (type === 'edit') {
-    Object.assign(formState, record);
-  } else {
-    formState.device_type = '';
-  }
+const showModal = (record) => {
+  // modalType.value = type;
+  // if (type === 'edit') {
+  //   Object.assign(formState, record);
+  // } else {
+  //   formState.device_type = '';
+  // }
   modalVisible.value = true;
+  getUserInfoById(record.id);
+
 };
+
+
+//点击ok，关闭模态框
+const handleSave = () => {
+  modalVisible.value = false;
+};
+
 
 // //查询
 // const matchSearch = () => {
 //   console.log('查询内容:', searchQuery.value);
 //   // 在这里调用查询逻辑
+//
 // };
 
-// 提交表单
-const handleSubmit = () => {
-  if (!formState.device_type) {
-    message.error('请填写分类名称');
-    return;
+
+//查询所有（支持模糊查询）
+const getUserInfo = async () => {
+  try {
+    //id测试，需要登录的时候保存在全局
+    axios.get('/admin/merchantInfoManagement/get',
+        {
+          params:{
+            searchQuery: searchQuery.value
+          },
+          headers: {
+            'Content-Type': 'application/json'//设置请求头
+          }
+        }
+    ).then(response => {
+      console.log("response.data.content:",response.data.content);
+      // Object.assign(dataSource, response.data.content);
+
+      const responseData = response.data.content;
+      dataSource.value = responseData;
+
+    })
+  }catch (error) {
+    console.log('Error fetching user info:', error)
   }
+}
 
-  if (modalType.value === 'add') {
-    const newId = dataSource.value.length
-        ? Math.max(...dataSource.value.map(d => d.category_id)) + 1
-        : 1;
-
-    dataSource.value.push({
-      ...formState,
-      category_id: newId,
-      is_active: '1',
-      is_delete: '0',
-      created_time: new Date().toLocaleString()
-    });
-  } else {
-    const index = dataSource.value.findIndex(
-        d => d.category_id === formState.category_id
-    );
-    dataSource.value.splice(index, 1, formState);
+//更新状态
+const updateStatus = async (id,isActived) => {
+  try {
+    axios.post('/admin/merchantInfoManagement/update',
+        {
+          id: id,
+          status: isActived,
+        }
+        ,{
+          headers: {
+            'Content-Type': 'application/json'//设置请求头
+          }
+        }).then(response => {
+      console.log("response.data.success:",response.data.success);
+      // Object.assign(userInfo, response.data.content);
+      //重新刷新数据
+      getUserInfo();
+      message.success("修改成功");
+    })
+    message.success('信息更新成功');
+  } catch (error) {
+    message.error('保存失败，请重试');
   }
-
-  modalVisible.value = false;
-  message.success('操作成功');
 };
 
 // 切换状态
 const toggleStatus = (record) => {
-  record.is_active = record.is_active === '1' ? '0' : '1';
+  record.isActived = record.isActived === '1' ? '0' : '1';
+
+  updateStatus(record.id,record.isActived);
 };
 
-// 删除项
-// const deleteItem = (id) => {
-//   dataSource.value = dataSource.value.filter(d => d.category_id !== id);
-//   message.success('删除成功');
+//更具id查询，显示详细信息
+const getUserInfoById = async (id) => {
+  try {
+    //id测试，需要登录的时候保存在全局
+    axios.get(`/merchant/userInfo/getUserInfo/${id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json'//设置请求头
+          }
+        }
+    ).then(response => {
+      console.log("response.data.content:",response.data.content);
+      formState.username = response.data.content.username;
+      formState.name = response.data.content.name;
+      formState.gender = response.data.content.gender;
+      formState.age = response.data.content.age;
+      formState.phone = response.data.content.phone;
+      formState.email = response.data.content.email;
+      formState.avatar = response.data.content.avatar;
+
+      // Object.assign(userInfo, response.data.content);
+    })
+  }catch (error) {
+    console.log('Error fetching user info:', error)
+  }
+}
+
+
+onMounted(()=>{
+  getUserInfo();
+})
+
+// 提交表单
+// const handleSubmit = () => {
+//   if (!formState.device_type) {
+//     message.error('请填写分类名称');
+//     return;
+//   }
+//
+//   if (modalType.value === 'add') {
+//     const newId = dataSource.value.length
+//         ? Math.max(...dataSource.value.map(d => d.category_id)) + 1
+//         : 1;
+//
+//     dataSource.value.push({
+//       ...formState,
+//       category_id: newId,
+//       isActived: '1',
+//       is_delete: '0',
+//       created_time: new Date().toLocaleString()
+//     });
+//   } else {
+//     const index = dataSource.value.findIndex(
+//         d => d.category_id === formState.category_id
+//     );
+//     dataSource.value.splice(index, 1, formState);
+//   }
+//
+//   modalVisible.value = false;
+//   message.success('操作成功');
 // };
+
+
+
 
 // 搜索功能
 const matchSearch = () => {
   // 搜索功能已经通过 computed 实现，无需额外操作
+  getUserInfo();
 };
 </script>
 
