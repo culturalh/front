@@ -99,7 +99,7 @@
               :precision="2"
               style="width: 200px"
           />
-          <span style="margin-left: 8px">元</span>
+          <span style="margin-left: 8px">元/月</span>
         </a-form-item>
 
 <!--        <a-form-item-->
@@ -150,6 +150,15 @@ import {ref, reactive, onMounted} from 'vue';
 import { message } from 'ant-design-vue';
 import { PlusOutlined } from '@ant-design/icons-vue';
 import axios from "axios";
+import { useUserStore } from '@/stores/userStore'
+
+
+const userStore = useUserStore()
+onMounted(()=>{
+  getApplianceInfo();
+  fetchCategories();
+})
+
 
 // 模拟初始数据
 const initData = [
@@ -183,13 +192,6 @@ const modalType = ref('add');
 const currentAppliance = reactive({});
 const imageFiles = ref([]);
 
-// 分类选项
-// const categoryOptions = [
-//   { value: '1', label: '大家电' },
-//   { value: '2', label: '厨房电器' },
-//   { value: '3', label: '生活电器' }
-// ];
-
 const categoryOptions = ref([]);
 
 // 获取家电分类方法
@@ -218,9 +220,10 @@ const columns = [
     title: '分类',
     dataIndex: 'deviceType',
     width: 120,
-    // customRender: ({ text }) => {
-    //   return categoryOptions.value.find(opt => opt.value === text)?.label || '-';
-    // }
+    customRender: ({ text }) => {
+      const category = categoryOptions.value.find(opt => opt.label === text);
+      return category ? category.label : '未知分类';
+    }
   },
   {
     title: '价格(元/月)',
@@ -246,6 +249,11 @@ const columns = [
     slots: { customRender: 'status' }
   },
   {
+    title: '描述',
+    dataIndex: 'description',
+    width: 100
+  },
+  {
     title: '操作',
     width: 200,
     slots: { customRender: 'action' }
@@ -260,6 +268,8 @@ const getApplianceInfo = async () => {
         {
           params: {
             searchQuery: searchQuery.value,
+            //只能对本商家的家电产品进行管理
+            merchantId: userStore.userInfo.id
           },
         }
     ).then(response => {
@@ -276,21 +286,17 @@ const getApplianceInfo = async () => {
   }
 };
 
-// 在新增和修改方法中添加转换逻辑
-const getChineseCategoryName = (typeId) => {
-  const found = categoryOptions.value.find(opt => opt.value === typeId);
-  return found ? found.label : '未知分类';
-};
 
-// 增加家电分类
+// 增加家电信息
 const addApplianceInfo =  () => {
   try {
     const formData = new FormData();
-    // formData.append('id', '1891189268559302656');
+    const deviceTypeLabel = categoryOptions.value.find(opt => opt.value === currentAppliance.deviceType)?.label;
     formData.append('applianceName', currentAppliance.applianceName);
-    formData.append('deviceType',  getChineseCategoryName(currentAppliance.deviceType));
+    formData.append('deviceType',  deviceTypeLabel);
     formData.append('price',  currentAppliance.price);
-
+    formData.append('description', currentAppliance.description)
+    formData.append('merchantId',userStore.userInfo.id)
     // 如果有新上传的头像文件
     if (imageFiles.value.length > 0 && imageFiles.value[0].originFileObj) {
       // 添加文件对象到 FormData
@@ -322,15 +328,19 @@ const addApplianceInfo =  () => {
   }
 };
 
+
 // 修改家电分类
 const updateApplianceInfo =  () => {
   try {
     const formData = new FormData();
+    const deviceTypeLabel = categoryOptions.value.find(opt => opt.value === currentAppliance.deviceType)?.label;
     formData.append('id', currentAppliance.id);
     formData.append('applianceName', currentAppliance.applianceName);
-    formData.append('deviceType',  getChineseCategoryName(currentAppliance.deviceType));
+    formData.append('deviceType',  deviceTypeLabel);
     formData.append('price',  currentAppliance.price);
     formData.append('status',  currentAppliance.status)
+    formData.append('description', currentAppliance.description)
+    formData.append('merchantId',userStore.userInfo.id)
     // 如果有新上传的头像文件
     if (imageFiles.value.length > 0 && imageFiles.value[0].originFileObj) {
       // 添加文件对象到 FormData
@@ -339,20 +349,7 @@ const updateApplianceInfo =  () => {
       // 如果未上传新文件但已有头像，传递原有地址（可选）
       formData.append('existingPicture',currentAppliance.picture);
     }
-
     axios.post('/merchant/applianceInfo/update',
-        //     {
-        //   id: 1891366491547373568,
-        //   username: editForm.username,
-        //   name: editForm.name,
-        //   gender: editForm.gender,
-        //   role: editForm.role,
-        //   age: editForm.age,
-        //   phone: editForm.phone,
-        //   email: editForm.email,
-        //   // avatar: editForm.avatar
-        //   avatar: imageFiles.value.length > 0 ? imageFiles.value[0].url : ''//如果有头像就赋值，没有就赋空
-        // }
         formData
         ,{
           headers: {
@@ -370,6 +367,7 @@ const updateApplianceInfo =  () => {
     modalVisible.value = false;
     // message.success('成功');
   } catch (error) {
+    console.log('error', error)
     message.error('保存失败，请重试');
   }
 };
@@ -393,29 +391,26 @@ const deleteApplianceInfo = async (id) => {
 };
 
 
-// 搜索功能
-// const filteredAppliances = computed(() => {
-//   return appliances.value.filter(item =>
-//       item.applianceName.includes(searchValue.value)
-//   );
-// });
-
 // 显示模态框
 const showModal = (type, record) => {
   modalType.value = type;
   if (type === 'edit') {
-    Object.assign(currentAppliance, record);
-    // if (record.picture) {
-    //   imageFiles.value = [{
-    //     uid: '-1',
-    //     name: 'image.png',
-    //     status: 'done',
-    //     url: record.picture
-    //   }];
-    // }
-
-    //更新信息
-    // updateApplianceInfo();
+    console.log('record', record)
+    const category = categoryOptions.value.find(opt => opt.label === record.deviceType);
+    Object.assign(currentAppliance, {
+      ...record,
+      deviceType: category ? category.value : undefined
+    });
+// 修改后（补充必要字段）
+    if (record.picture) {
+      imageFiles.value = [{
+        uid: '-1',
+        name: 'preview-image',
+        status: 'done',          // 必须字段
+        url: record.picture,     // 原图地址
+        thumbUrl: record.picture // 缩略图地址（用于预览）
+      }];
+    }
   }
   else {
     Object.assign(currentAppliance, {
@@ -429,7 +424,6 @@ const showModal = (type, record) => {
       status: '1'
     });
     imageFiles.value = [];
-    // addApplianceInfo();
   }
   modalVisible.value = true;
 };
@@ -437,46 +431,22 @@ const showModal = (type, record) => {
 // 提交表单
 const handleSubmit = async () => {
   try {
-    // 模拟保存操作
-    // await new Promise(resolve => setTimeout(resolve, 1000));
 
     if (modalType.value === 'add') {
-      // const newId = appliances.value.length
-      //     ? Math.max(...appliances.value.map(d => d.id)) + 1
-      //     : 1;
-      // appliances.value.push({
-      //   ...currentAppliance,
-      //   id: newId,
-      //   picture: imageFiles.value[0]?.url || ''
-      // });
       addApplianceInfo();
     } else {
-      // const index = appliances.value.findIndex(
-      //     d => d.id === currentAppliance.id
-      // );
-      // appliances.value.splice(index, 1, {
-      //   ...currentAppliance,
-      //   picture: imageFiles.value[0]?.url || ''
-      // });
       updateApplianceInfo();
     }
 
     modalVisible.value = false;
-    message.success('操作成功');
   } catch (error) {
     message.error('操作失败，请重试');
   }
 };
 
-
 const handleSearch = () => {
     getApplianceInfo();
 };
-
-onMounted(()=>{
-  getApplianceInfo();
-  fetchCategories();
-})
 
 //更新状态
 const updateStatus = async (id,status) => {

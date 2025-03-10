@@ -158,13 +158,18 @@
 import { ref } from 'vue';
 import TheHeader from '@/components/TheHeader'
 import TheSider from '@/components/TheSider'
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/userStore';
+
+const router = useRouter();
+const userStore = useUserStore();
 import {
   HomeOutlined,
   AppstoreOutlined,
   ShoppingCartOutlined,
   TeamOutlined,
   ProfileOutlined,
-  QuestionCircleOutlined,
+  // QuestionCircleOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined
 } from '@ant-design/icons-vue';
@@ -210,6 +215,10 @@ const topMenuItems = ref([
 
 const handleLogout = () => {
   console.log('执行退出登录逻辑');
+  userStore.logout()
+  router.push('/login').then(() => {
+    window.location.reload() // 强制刷新清除路由缓存
+  })
   // 实际业务中这里应该调用退出登录接口
   // 并跳转到登录页面
 };
@@ -247,12 +256,12 @@ const sideMenuItems = ref([
     icon: ProfileOutlined,
     to: '/userTransaction'
   },
-  {
-    key: '6',
-    label: '日志管理',
-    icon: QuestionCircleOutlined,
-    to: '/userLog'
-  }
+  // {
+  //   key: '6',
+  //   label: '日志管理',
+  //   icon: QuestionCircleOutlined,
+  //   to: '/userLog'
+  // }
 ]);
 
 const isCollapsed = ref(false);

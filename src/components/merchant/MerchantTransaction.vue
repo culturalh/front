@@ -1,5 +1,16 @@
 <template>
-  <a-card class="order-table-card" title="订单列表" bordered>
+  <!-- 操作工具栏 -->
+  <div class="toolbar">
+    <a-input-search
+        v-model:value="searchQuery"
+        placeholder="请输入交易编号"
+        enter-button="搜索"
+        @search="matchSearch"
+        style="width: 300px; margin-right: 16px;"
+    />
+    <!--      <a-button type="primary" @click="showModal('add')">新增分类</a-button>-->
+  </div>
+  <a-card class="order-table-card" bordered>
     <table class="order-table">
       <thead>
       <tr>
@@ -9,16 +20,17 @@
       </thead>
       <tbody>
       <tr v-for="order in orders" :key="order.orderId">
-        <td>{{ order.orderId }}</td>
-<!--        <td>{{ order.userId }}</td>-->
-<!--        <td>{{ order.merchantName }}</td>-->
         <td>{{ order.orderedNo }}</td>
+<!--        <td>{{ order.orderId }}</td>-->
+        <td>{{ order.usersName }}</td>
+        <td>{{ order.merchantsName }}</td>
+<!--        <td>{{ order.orderedNo }}</td>-->
         <td>{{ order.applianceName }}</td>
-        <td>{{ order.startDate }}</td>
-        <td>{{ order.endDate }}</td>
+<!--        <td>{{ order.startDate }}</td>-->
+<!--        <td>{{ order.endDate }}</td>-->
         <td>{{ order.rentalPrice }}</td>
         <td>{{ order.createTime }}</td>
-        <td>{{ order.description }}</td>
+<!--        <td>{{ order.description }}</td>-->
         <!--        <td>-->
         <!--          <a-space>-->
         <!--            <a-button type="primary" size="small" @click="onEdit(order)">编辑</a-button>-->
@@ -32,22 +44,24 @@
 </template>
 
 <script setup>
-import {onMounted, reactive} from "vue";
+import {ref,onMounted, reactive} from "vue";
 // import { message } from "ant-design-vue";
 import axios from 'axios'
-
+import {useUserStore} from "@/stores/userStore";
+const userStore = useUserStore();
+const searchQuery = ref();
 // 定义表头列
 const columns = reactive([
-  { title: "订单编号", key: "orderId" },
-  // { title: "用户编号", key: "userId" },
-  // { title: "商家名称", key: "merchantName" },
-  { title: "订单号", key: "orderedNo" },
+  { title: "交易编号", key: "orderedNo" },
+  // { title: "交易编号", key: "orderId" },
+  { title: "用户名称", key: "usersName" },
+  { title: "商家名称", key: "merchantsName" },
   { title: "设备名称", key: "applianceName" },
-  { title: "租赁开始日期", key: "startDate" },
-  { title: "租赁结束日期", key: "endDate" },
-  { title: "租赁价格", key: "rentalPrice" },
-  { title: "订单创建时间", key: "createTime" },
-  { title: "订单备注", key: "description" },
+  // { title: "租赁开始日期", key: "startDate" },
+  // { title: "租赁结束日期", key: "endDate" },
+  { title: "租赁总价格", key: "rentalPrice" },
+  { title: "交易时间", key: "createTime" },
+  // { title: "订单备注", key: "description" },
 ]);
 
 // 表格数据
@@ -77,16 +91,24 @@ const orders = reactive([
     description: "无",
   },
 ]);
+const matchSearch = () => {
+  getOrders();
+};
 const getOrders = async () => {
   try {
     //传入用户id
-    const response = await axios.get('/merchant/order/get/{id}', {
+    const response = await axios.get('/merchant/order/get', {
+      params: {
+        //商家id
+        id: userStore.userInfo.id,
+        searchQuery: searchQuery.value
+      },
       headers: {
         'Content-Type': 'application/json',
       },
     });
     if (response.data.success) {
-      orders.value = response.data.content;
+      orders.splice(0, orders.length, ...response.data.content);
     } else {
       console.error('Failed to fetch orders');
     }

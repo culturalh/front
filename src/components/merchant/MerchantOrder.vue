@@ -1,5 +1,17 @@
 <template>
-  <a-card class="order-table-card" title="订单列表" bordered>
+  <!-- 操作工具栏 -->
+  <div class="toolbar">
+    <a-input-search
+        v-model:value="searchQuery"
+        placeholder="请输入订单号"
+        enter-button="搜索"
+        @search="matchSearch"
+        style="width: 300px; margin-right: 16px;"
+    />
+    <!--      <a-button type="primary" @click="showModal('add')">新增分类</a-button>-->
+  </div>
+
+  <a-card class="order-table-card" bordered>
     <table class="order-table">
       <thead>
       <tr>
@@ -8,17 +20,17 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="order in orders" :key="order.orderId">
-        <td>{{ order.orderId }}</td>
-        <td>{{ order.userId }}</td>
-        <td>{{ order.merchantName }}</td>
+      <tr v-for="(order,index) in orders" :key="order.orderId">
+        <td>{{ index + 1 }}</td>
+        <td>{{ order.usersName }}</td>
+<!--        <td>{{ order.merchantsName }}</td>-->
         <td>{{ order.orderedNo }}</td>
         <td>{{ order.applianceName }}</td>
-        <td>{{ order.startDate }}</td>
-        <td>{{ order.endDate }}</td>
+        <td>{{ order.startTime }}</td>
+        <td>{{ order.endTime }}</td>
         <td>{{ order.rentalPrice }}</td>
         <td>{{ order.createTime }}</td>
-        <td>{{ order.description }}</td>
+        <td>{{ order.orderRemark }}</td>
         <!--        <td>-->
         <!--          <a-space>-->
         <!--            <a-button type="primary" size="small" @click="onEdit(order)">编辑</a-button>-->
@@ -32,61 +44,72 @@
 </template>
 
 <script setup>
-import {onMounted, reactive} from "vue";
+import { ref,onMounted, reactive } from "vue";
 // import { message } from "ant-design-vue";
 import axios from 'axios'
-
+import { useUserStore} from "@/stores/userStore";
+const userStore = useUserStore();
+const searchQuery = ref('');
 // 定义表头列
 const columns = reactive([
   { title: "订单编号", key: "orderId" },
-  { title: "用户编号", key: "userId" },
-  { title: "商家名称", key: "merchantName" },
+  { title: "租赁用户", key: "usersName" },
+  // { title: "商家名称", key: "merchantsName" },
   { title: "订单号", key: "orderedNo" },
   { title: "设备名称", key: "applianceName" },
-  { title: "租赁开始日期", key: "startDate" },
-  { title: "租赁结束日期", key: "endDate" },
-  { title: "租赁价格", key: "rentalPrice" },
+  { title: "租赁开始日期", key: "startTime" },
+  { title: "租赁结束日期", key: "endTime" },
+  { title: "租赁总价格", key: "rentalPrice" },
   { title: "订单创建时间", key: "createTime" },
-  { title: "订单备注", key: "description" },
+  { title: "订单备注", key: "orderRemark" },
 ]);
 
 // 表格数据
 const orders = reactive([
   {
     orderId: "123456",
-    userId: "789012",
-    merchantName: "张三家电",
+    usersName: "789012",
+    merchantsName: "张三家电",
     orderedNo: "20241010001",
     applianceName: "冰箱",
-    startDate: "2024-10-01",
-    endDate: "2024-10-31",
+    startTime: "2024-10-01",
+    endTime: "2024-10-31",
     rentalPrice: "500.00",
     createTime: "2024-10-10 10:00:00",
-    description: "无",
+    orderRemark: "无",
   },
   {
     orderId: "654321",
-    userId: "210987",
-    merchantName: "李四家电",
+    usersName: "210987",
+    merchantsName: "李四家电",
     orderedNo: "20241010002",
     applianceName: "洗衣机",
-    startDate: "2024-10-05",
-    endDate: "2024-11-05",
+    startTime: "2024-10-05",
+    endTime: "2024-11-05",
     rentalPrice: "300.00",
     createTime: "2024-10-12 15:30:00",
-    description: "无",
+    orderRemark: "无",
   },
 ]);
+const matchSearch = () => {
+  getOrders();
+};
+
 const getOrders = async () => {
   try {
     //传入用户id
-    const response = await axios.get('/merchant/order/get/{id}', {
+    const response = await axios.get('/merchant/order/get', {
+      params: {
+        //商家id
+        id: userStore.userInfo.id,
+        searchQuery: searchQuery.value
+      },
       headers: {
         'Content-Type': 'application/json',
       },
     });
     if (response.data.success) {
-      orders.value = response.data.content;
+      orders.splice(0, orders.length, ...response.data.content);
     } else {
       console.error('Failed to fetch orders');
     }

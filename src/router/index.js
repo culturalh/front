@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 // import HomeView from '../views/HomeView.vue'
+import { useUserStore } from '@/stores/userStore';
 
 const routes = [
   {
@@ -144,9 +145,6 @@ const routes = [
       }
     ]
   }
-
-
-
 ]
 
 const router = createRouter({
@@ -154,22 +152,27 @@ const router = createRouter({
   routes
 })
 
+// 路由守卫
+router.beforeEach((to,from,next) => {
+  const store = useUserStore()
+  const publicPages = ['/login', '/register']
+  // 如果访问的是公共页面，直接放行
+  if (publicPages.includes(to.path)) {
+    next();
+    return;
+  }
 
-// // 路由守卫
-// router.beforeEach((to, from, next) => {
-//   const isLoggedIn = checkUserLoginStatus(); // 检查用户是否已登录
-//   if (to.meta.requiresAuth && !isLoggedIn) {
-//     next('/login'); // 未登录时跳转到登录页面
-//   } else {
-//     next(); // 放行
-//   }
-// });
-//
-// // 检查用户登录状态
-// function checkUserLoginStatus() {
-//   // 从 localStorage 或 Vuex 中获取登录状态
-//   return localStorage.getItem('isLoggedIn') === 'true';
-// }
+  // 如果用户已登录
+  if (store.userInfo.token) {
+    // 如果一切正常，放行
+    next();
+  } else {
+    // 如果未登录，重定向到登录页面
+    next('/login');
+  }
+})
+
+
 
 
 export default router

@@ -42,6 +42,19 @@
 
 <script setup>
 import { ref,defineProps,defineEmits } from 'vue';
+// import { ref,defineProps } from 'vue';
+// import { useRouter } from 'vue-router';
+// import { useUserStore } from '@/stores/userStore';
+//
+// const router = useRouter();
+// const userStore = useUserStore();
+
+// const handleLogout = () => {
+//   userStore.logout()
+//   router.push('/login').then(() => {
+//     window.location.reload() // 强制刷新清除路由缓存
+//   })
+// }
 
 const props = defineProps({
   logo: {

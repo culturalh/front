@@ -72,6 +72,9 @@ import { message } from 'ant-design-vue';
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useUserStore } from '@/stores/userStore'
+
+const store = useUserStore()
 
 export default {
   name: 'LoginView',
@@ -105,30 +108,45 @@ export default {
         password: loginForm.password,
         role: loginForm.role,
       })
-        .then( response => {
-          //停止加载状态
-          loading.value = false;
-          let isSuccess = response.data;
-          if (isSuccess) {
-            message.success('登录成功！');
-            router.push('/');//跳转到首页
-          } else {
-            console.log(response)
-            message.error('登录失败，请检查用户名、密码和角色是否正确！');
-          }
-          // console.log("返回的数据:",response)//不能使用+号拼接
-          // //TODO 判断返回的数据是否是成功
-          // message.info('登录成功！')
+          .then(response => {
+            //停止加载状态
+            loading.value = false;
+            let isSuccess = response.data.success;
+            let returnData = response.data.content;
+            if (isSuccess) {
 
-          // router.push('/test')
+              //保存全局身份信息
+              store.login({
+                id: returnData.id,
+                username: returnData.username,
+                role: returnData.role,
+                token: returnData.token
+              })
+              localStorage.setItem("token", returnData.token)
+              if (returnData.role === '管理员') {
+                router.push('/adminMain')
+              } else if (returnData.role === '商家') {
+                router.push('/merchantMain')
+              } else if (returnData.role == '普通用户') {
+                router.push('/userMain')
+              } else {
+                message.error('登录失败，请检查用户名、密码是否正确！');
+              }
 
-        })
-        .catch(error => {
-          loading.value = false;
-          console.log("错误信息:",error)
-          message.error('登录失败，请检查用户名、密码和角色是否正确！');
-        });
+              message.success('登录成功！');
+              // router.push('/');//跳转到首页
+            } else {
+              console.log(response)
+              message.error(response.data.msg);
+            }
 
+          })
+          .catch(error => {
+            loading.value = false;
+            console.log("错误信息:", error)
+            message.error('登录失败，请检查用户名、密码是否正确！');
+          });
+    }
       // 模拟登录请求
       // setTimeout(() => {
       //   loading.value = false;
@@ -136,7 +154,8 @@ export default {
       //   console.log('登录数据:', values);
       //   router.push('/dashboard'); // 登录成功后跳转到仪表盘页面
       // }, 1500);
-    };
+    // };
+
 
     const onFinishFailed = (errors) => {
       console.log('验证失败:', errors);

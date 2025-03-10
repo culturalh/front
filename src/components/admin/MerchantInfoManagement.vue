@@ -167,13 +167,6 @@ const columns = [
 const dataSource = ref([...initData]);
 const searchQuery = ref('');
 
-// 过滤后的数据源
-// const filteredDataSource = computed(() => {
-//   return dataSource.value.filter(item =>
-//       item.device_type.includes(searchQuery.value)
-//   );
-// });
-
 const modalVisible = ref(false);
 // const modalType = ref('add');
 const formState = reactive({
@@ -188,12 +181,7 @@ const formState = reactive({
 
 // 显示模态框
 const showModal = (record) => {
-  // modalType.value = type;
-  // if (type === 'edit') {
-  //   Object.assign(formState, record);
-  // } else {
-  //   formState.device_type = '';
-  // }
+
   modalVisible.value = true;
   getUserInfoById(record.id);
 
@@ -205,13 +193,6 @@ const handleSave = () => {
   modalVisible.value = false;
 };
 
-
-// //查询
-// const matchSearch = () => {
-//   console.log('查询内容:', searchQuery.value);
-//   // 在这里调用查询逻辑
-//
-// };
 
 
 //查询所有（支持模糊查询）
@@ -246,7 +227,7 @@ const updateStatus = async (id,isActived) => {
     axios.post('/admin/merchantInfoManagement/update',
         {
           id: id,
-          status: isActived,
+          isActived: isActived,
         }
         ,{
           headers: {
@@ -268,7 +249,7 @@ const updateStatus = async (id,isActived) => {
 // 切换状态
 const toggleStatus = (record) => {
   record.isActived = record.isActived === '1' ? '0' : '1';
-
+  console.log("record.isActived:",record.isActived)
   updateStatus(record.id,record.isActived);
 };
 

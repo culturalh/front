@@ -99,7 +99,8 @@ import {ref, reactive, onMounted} from 'vue';
 import { message } from 'ant-design-vue';
 import { EditOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import axios from "axios";
-
+import {useUserStore} from "@/stores/userStore";
+const userStore = useUserStore();
 // 模拟用户数据
 const userInfo = reactive({
   id: '',
@@ -147,7 +148,7 @@ const editProfile = () => {
 const getUserInfo = async () => {
   try {
     //id测试，需要登录的时候保存在全局
-    axios.get(`/merchant/userInfo/getUserInfo/1891189268559302656`,
+    axios.get(`/merchant/userInfo/getUserInfo/${userStore.userInfo.id}`,
         {
           headers: {
             'Content-Type': 'application/json'//设置请求头
@@ -170,7 +171,7 @@ onMounted(()=>{
 const handleSave = async () => {
   try {
     const formData = new FormData();
-    formData.append('id', '1891189268559302656');
+    formData.append('id', userStore.userInfo.id);
     formData.append('username', editForm.username);
     formData.append('name', editForm.name);
     formData.append('gender', editForm.gender);
