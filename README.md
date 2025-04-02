@@ -1,3 +1,5 @@
+家电租赁系统前端完整项目
+
 # application-front
 
 ## Project setup
